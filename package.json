@@ -1,0 +1,13 @@
+{
+  "name": "triseal-ps4-platform",
+  "version": "2.4.0",
+  "private": true,
+  "description": "TriSeal (PS-4): Sealed Multi-Party AI Safety Evaluation & Verification Engine by Team Pinnacle",
+  "scripts": {
+    "start": "python3 -m http.server 3000",
+    "verify": "python3 cli/triseal_verify.py --self-test"
+  },
+  "keywords": ["ai-safety", "red-teaming", "gvisor", "merkle-tree", "opa", "triseal"],
+  "author": "Team Pinnacle (Jyotasana, Arpita Matta, Anand Minejes)",
+  "license": "MIT"
+}

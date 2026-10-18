@@ -1,0 +1,64 @@
+version: "3.9"
+# TriSeal (PS-4) — Multi-Network Sealed Container Topology
+services:
+  red_cell:
+    image: python:3.11-slim
+    command: ["python3", "-m", "http.server", "8081"]
+    read_only: true
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - red_net
+
+  blue_cell:
+    image: python:3.11-slim
+    command: ["python3", "-m", "http.server", "8082"]
+    read_only: true
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - blue_net
+
+  llm_cell:
+    image: ollama/ollama:latest
+    read_only: true
+    cap_drop: ["ALL"]
+    networks:
+      - llm_net
+
+  airlock:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app:ro
+    command: ["python3", "cli/triseal_verify.py", "--self-test"]
+    environment:
+      - CADENCE_MS=250
+      - PAD_BYTES=4096
+    networks:
+      - red_net
+      - blue_net
+      - llm_net
+      - ledger_net
+
+  seal_ledger:
+    image: python:3.11-slim
+    command: ["python3", "-m", "http.server", "8085"]
+    networks:
+      - ledger_net
+
+networks:
+  red_net:
+    internal: true
+    driver: bridge
+  blue_net:
+    internal: true
+    driver: bridge
+  llm_net:
+    internal: true
+    driver: bridge
+  ledger_net:
+    internal: true
+    driver: bridge

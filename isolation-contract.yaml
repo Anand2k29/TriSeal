@@ -1,0 +1,22 @@
+contract_version: "2.4.0"
+project: "TriSeal PS-4 Sealed Evaluation Sandbox"
+invariants:
+  container_isolation:
+    rootless: true
+    runtime: "runsc"
+    fallback_runtime: "runc-hardened"
+    read_only_rootfs: true
+    cap_drop: ["ALL"]
+    seccomp_sha256: "7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730"
+  network_segmentation:
+    red_cell: ["red_net"]
+    blue_cell: ["blue_net"]
+    llm_cell: ["llm_net"]
+    airlock: ["red_net", "blue_net", "llm_net", "ledger_net"]
+    direct_red_blue_allowed: false
+  airlock_shaping:
+    pad_envelope_bytes: 4096
+    fixed_cadence_ms: 250
+  llm_hygiene:
+    per_session_context_wipe: true
+    kv_cache_isolation: "salted_prefix_per_session"

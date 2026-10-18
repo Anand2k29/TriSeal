@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 310" width="100%" height="310">
+  <rect width="960" height="310" fill="#07080A" rx="6" stroke="#232936" stroke-width="2"/>
+  
+  <!-- Red Cell -->
+  <rect x="24" y="30" width="180" height="90" rx="4" fill="#220D14" stroke="#F43F5E" stroke-width="1.8"/>
+  <text x="38" y="56" fill="#FDA4AF" font-family="monospace" font-size="13" font-weight="bold">1. RED CELL</text>
+  <text x="38" y="76" fill="#F43F5E" font-family="monospace" font-size="10">JailbreakBench / AdvBench</text>
+  <text x="38" y="96" fill="#CBD5E1" font-family="monospace" font-size="10">rootless · gVisor · red_net</text>
+
+  <!-- Direct Breach Attempt Blocked -->
+  <line x1="114" y1="120" x2="114" y2="190" stroke="#F43F5E" stroke-width="2" stroke-dasharray="4 4"/>
+  <rect x="44" y="142" width="140" height="24" rx="3" fill="#281117" stroke="#F43F5E"/>
+  <text x="54" y="158" fill="#FDA4AF" font-family="monospace" font-size="10" font-weight="bold">✖ DIRECT PATH DROPPED</text>
+
+  <!-- Blue Cell -->
+  <rect x="24" y="190" width="180" height="90" rx="4" fill="#0D192B" stroke="#3B82F6" stroke-width="1.8"/>
+  <text x="38" y="216" fill="#93C5FD" font-family="monospace" font-size="13" font-weight="bold">2. BLUE CELL</text>
+  <text x="38" y="236" fill="#60A5FA" font-family="monospace" font-size="10">Normalized Traffic Filter</text>
+  <text x="38" y="256" fill="#CBD5E1" font-family="monospace" font-size="10">rootless · gVisor · blue_net</text>
+
+  <!-- Dual-Homed Airlock -->
+  <rect x="270" y="30" width="210" height="190" rx="4" fill="#1C160B" stroke="#F59E0B" stroke-width="2"/>
+  <text x="290" y="56" fill="#FCD34D" font-family="monospace" font-size="14" font-weight="bold">3. DUAL-HOMED AIRLOCK</text>
+  <text x="290" y="76" fill="#F59E0B" font-family="monospace" font-size="10">• Macaroon + OPA Policy Check</text>
+  <text x="290" y="96" fill="#F59E0B" font-family="monospace" font-size="10">• Strip Identifying Headers</text>
+  <text x="290" y="116" fill="#F59E0B" font-family="monospace" font-size="10">• Deterministic 4096B Pad</text>
+  <text x="290" y="136" fill="#F59E0B" font-family="monospace" font-size="10">• Fixed-Cadence 250ms Release</text>
+  <rect x="288" y="156" width="174" height="44" rx="3" fill="#0B0D11" stroke="#78350F"/>
+  <text x="300" y="176" fill="#34D399" font-family="monospace" font-size="10" font-weight="bold">Bilateral Commit-Reveal</text>
+  <text x="300" y="191" fill="#94A3B8" font-family="monospace" font-size="9">SHA-256 Pre-Test Binding</text>
+
+  <!-- Model Gateway & LLM Cell -->
+  <rect x="546" y="30" width="195" height="190" rx="4" fill="#09221A" stroke="#10B981" stroke-width="1.8"/>
+  <text x="562" y="56" fill="#6EE7B7" font-family="monospace" font-size="13" font-weight="bold">4. MODEL GATEWAY</text>
+  <text x="562" y="78" fill="#34D399" font-family="monospace" font-size="10">• Per-Session Context Wipe</text>
+  <text x="562" y="98" fill="#34D399" font-family="monospace" font-size="10">• Salted KV-Cache Scoping</text>
+  <text x="562" y="118" fill="#34D399" font-family="monospace" font-size="10">• Egress Output Sanitizer</text>
+  <rect x="562" y="138" width="163" height="64" rx="3" fill="#0B0D11" stroke="#065F46"/>
+  <text x="574" y="160" fill="#A7F3D0" font-family="monospace" font-size="11" font-weight="bold">🧠 LLM CELL (llm_net)</text>
+  <text x="574" y="178" fill="#94A3B8" font-family="monospace" font-size="9.5">Ollama / vLLM (Qwen/Llama)</text>
+  <text x="574" y="192" fill="#94A3B8" font-family="monospace" font-size="9.5">Twin-Run Baseline Check</text>
+
+  <!-- Portable TriSeal Certificate -->
+  <rect x="795" y="30" width="142" height="190" rx="4" fill="#171326" stroke="#A855F7" stroke-width="1.8"/>
+  <text x="812" y="58" fill="#E9D5FF" font-family="monospace" font-size="12" font-weight="bold">5. CERTIFICATE</text>
+  <text x="812" y="82" fill="#C084FC" font-family="monospace" font-size="10">• ed25519 Signed</text>
+  <text x="812" y="102" fill="#C084FC" font-family="monospace" font-size="10">• Merkle Root</text>
+  <text x="812" y="122" fill="#C084FC" font-family="monospace" font-size="10">• Leak 95% CI</text>
+  <text x="812" y="142" fill="#C084FC" font-family="monospace" font-size="10">• Twin-Run Proof</text>
+  <rect x="810" y="166" width="112" height="34" rx="3" fill="#2E1065" stroke="#A855F7"/>
+  <text x="820" y="187" fill="#F3E8FF" font-family="monospace" font-size="10" font-weight="bold">PUBLIC VERIFY</text>
+
+  <!-- Bottom Seal Ledger Bar -->
+  <rect x="270" y="242" width="667" height="44" rx="4" fill="#1A1423" stroke="#A855F7" stroke-width="1.5"/>
+  <text x="290" y="268" fill="#E9D5FF" font-family="monospace" font-size="12" font-weight="bold">⛓ HASH-CHAINED SEAL LEDGER (SHA-256 + Signed Merkle Checkpoints + One-Way Falco eBPF Diode)</text>
+
+  <!-- Animated Packet Dots Flowing Across Airlock -->
+  <line x1="204" y1="75" x2="270" y2="75" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5 5">
+    <animate attributeName="stroke-dashoffset" values="20;0" dur="1s" repeatCount="indefinite"/>
+  </line>
+  <line x1="270" y1="210" x2="204" y2="210" stroke="#3B82F6" stroke-width="2" stroke-dasharray="5 5">
+    <animate attributeName="stroke-dashoffset" values="20;0" dur="1s" repeatCount="indefinite"/>
+  </line>
+  <line x1="480" y1="120" x2="546" y2="120" stroke="#10B981" stroke-width="2" stroke-dasharray="5 5">
+    <animate attributeName="stroke-dashoffset" values="20;0" dur="1s" repeatCount="indefinite"/>
+  </line>
+  <line x1="741" y1="120" x2="795" y2="120" stroke="#A855F7" stroke-width="2" stroke-dasharray="5 5">
+    <animate attributeName="stroke-dashoffset" values="20;0" dur="1s" repeatCount="indefinite"/>
+  </line>
+</svg>
