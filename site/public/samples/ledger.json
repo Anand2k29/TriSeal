@@ -1,0 +1,61 @@
+{
+  "printed_root": "4ec48487b8b467a3976656fcb24f0a028e3c0f9a76293866fa0a1cd65eb220e6",
+  "entries": [
+    {
+      "seq": 1,
+      "cell": "CONFORMANCE",
+      "type": "CONTRACT_VERIFIED",
+      "detail": "runsc gVisor + seccomp + 3 isolated networks",
+      "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "370a6926188c45841716d02f4e6e9c4371fed16eea8df080fc5f4ee0ad99e339"
+    },
+    {
+      "seq": 2,
+      "cell": "RED_CELL",
+      "type": "COMMIT_RED_PAYLOADS",
+      "detail": "sha256:e3b0c44298fc1c149afbf4c8",
+      "prev": "370a6926188c45841716d02f4e6e9c4371fed16eea8df080fc5f4ee0ad99e339",
+      "hash": "33645e0f6f1239c78d659f05f9ec82893d9998f45859cd2c02c3fa327e464dae"
+    },
+    {
+      "seq": 3,
+      "cell": "BLUE_CELL",
+      "type": "COMMIT_BLUE_DEFENSE",
+      "detail": "sha256:9f86d081884c7d659a2feaa0",
+      "prev": "33645e0f6f1239c78d659f05f9ec82893d9998f45859cd2c02c3fa327e464dae",
+      "hash": "c820f469cb16d550ab8f64563ac91ec804eae40483e67cfe9bb24a05ec4a5569"
+    },
+    {
+      "seq": 4,
+      "cell": "RED_CELL",
+      "type": "NET_BREACH_BLOCKED",
+      "detail": "Direct connect 10.10.1.4 -> 10.10.2.8:8080 dropped",
+      "prev": "c820f469cb16d550ab8f64563ac91ec804eae40483e67cfe9bb24a05ec4a5569",
+      "hash": "bc48b2436eb84ce284e5230af696d2e3a8bc88b1bf3649d33418b5535c185b62"
+    },
+    {
+      "seq": 5,
+      "cell": "AIRLOCK",
+      "type": "AIRLOCK_RELAY_4096B",
+      "detail": "OPA=ALLOW | Pad=4096B | Cadence=250.0ms",
+      "prev": "bc48b2436eb84ce284e5230af696d2e3a8bc88b1bf3649d33418b5535c185b62",
+      "hash": "480a8164e0fec9cfe46caa9d7801ea4512ac170f815f4b99b5af4471bcfa4d58"
+    },
+    {
+      "seq": 6,
+      "cell": "MODEL_GW",
+      "type": "SESSION_WIPE_INFER",
+      "detail": "Context wiped | KV-cache salted | Output sanitized",
+      "prev": "480a8164e0fec9cfe46caa9d7801ea4512ac170f815f4b99b5af4471bcfa4d58",
+      "hash": "cf72d94a625c8fad71adb6ec531b0238a8e94f1e7d4695ef6f309eaacbc1ea26"
+    },
+    {
+      "seq": 7,
+      "cell": "LEAK_HUNTER",
+      "type": "DISTINGUISHABILITY_TEST",
+      "detail": "N=600 | held-out accuracy recorded",
+      "prev": "cf72d94a625c8fad71adb6ec531b0238a8e94f1e7d4695ef6f309eaacbc1ea26",
+      "hash": "7122a3f7df3b6e1d31c64cd16e1b71d09d7633c8170f61b822684c021642bd55"
+    }
+  ]
+}

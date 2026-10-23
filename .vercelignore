@@ -1,0 +1,5 @@
+Process/
+.claude/
+site/node_modules/
+site/dist/
+**/__pycache__/
