@@ -54,15 +54,7 @@ npm run setup     # install site dependencies
 npm run dev       # http://localhost:5173
 ```
 
-Or start the site and the API together:
-
-```bash
-./scripts/dev.sh            # macOS / Linux / Git Bash   (--no-api, --build)
-```
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\dev.ps1   # Windows   (-NoApi, -Build)
-```
+To run the API alongside the site, start `npm run api` in a second terminal.
 
 | Command | What it does |
 | :--- | :--- |
@@ -186,7 +178,6 @@ site/            Vite multi-page web app (landing, overview, five tools)
 api/index.py     FastAPI backend (Vercel serverless function)
 cli/             Dependency-free Python verifier
 policy/          OPA policy for the airlock
-scripts/         dev.sh / dev.ps1 launchers
 isolation-contract.yaml  The published isolation contract
 docker-compose.yml       Sealed cells and networks for local runs
 ```

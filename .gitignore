@@ -9,6 +9,10 @@ dist/
 # === Process (Internal Documentation - Not for Repo) ===
 Process/
 
+# === Local Tooling (dev launchers, sample generator - Not for Repo) ===
+scripts/
+.claude/
+
 # === Environment ===
 .env
 .env.local

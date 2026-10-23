@@ -10,8 +10,7 @@
     "preview": "npm --prefix site run preview",
     "api": "python -m uvicorn api.index:app --reload --port 8000",
     "verify": "python cli/triseal_verify.py --self-test",
-    "verify:tamper": "python cli/triseal_verify.py --self-test --simulate-tamper",
-    "samples": "node scripts/generate-samples.mjs site/public/samples isolation-contract.yaml && node -e \"require('fs').copyFileSync('isolation-contract.yaml','site/public/samples/isolation-contract.yaml')\""
+    "verify:tamper": "python cli/triseal_verify.py --self-test --simulate-tamper"
   },
   "keywords": [
     "ai-safety",
