@@ -12,6 +12,14 @@ TriSeal lets a red team, a blue team and the model under test run an AI safety e
 
 Everything in the web app runs **in your browser** with Web Crypto. Files you drop in are parsed locally and never uploaded.
 
+## Watch the tour
+
+<!-- After uploading to YouTube, replace YOUTUBE_VIDEO_ID below (two places) with the ID from the video URL:
+     https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID  -->
+[![TriSeal in 90 seconds — watch on YouTube](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID)
+
+*TriSeal in 90 seconds — click to watch on YouTube.*
+
 ---
 
 ## Contents
