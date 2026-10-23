@@ -14,9 +14,7 @@ Everything in the web app runs **in your browser** with Web Crypto. Files you dr
 
 ## Watch the tour
 
-<!-- After uploading to YouTube, replace YOUTUBE_VIDEO_ID below (two places) with the ID from the video URL:
-     https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID  -->
-[![TriSeal in 90 seconds — watch on YouTube](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID)
+[![TriSeal in 90 seconds — watch on YouTube](https://img.youtube.com/vi/-StZUSAF26E/sddefault.jpg)](https://youtu.be/-StZUSAF26E)
 
 *TriSeal in 90 seconds — click to watch on YouTube.*
 
