@@ -13,6 +13,14 @@ Process/
 scripts/
 .claude/
 
+# === Video (the promo lives on YouTube; the README links to it) ===
+Video/
+*.mp4
+*.mov
+*.webm
+*.mkv
+*.srt
+
 # === Environment ===
 .env
 .env.local

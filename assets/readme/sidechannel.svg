@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 380" width="1280" height="380" role="img" aria-label="A timing spy guesses blocked versus allowed with 100% accuracy without TriSeal and 50% with TriSeal">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1118"/>
+      <stop offset="1" stop-color="#05070a"/>
+    </linearGradient>
+    <style>
+      .mono { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+      .sans { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif; }
+    </style>
+  </defs>
+  <rect width="1280" height="380" rx="18" fill="url(#bg)"/>
+  <rect x="0.5" y="0.5" width="1279" height="379" rx="18" fill="none" stroke="#2a3644"/>
+  <text x="40" y="50" class="mono" font-size="18" letter-spacing="3" fill="#22d3c5">CAN A SPY READ THE CLOCK?</text>
+  <text x="1240" y="50" text-anchor="end" class="mono" font-size="16" fill="#5f6e7e"><tspan fill="#ff3b5c">■</tspan> blocked  <tspan fill="#3d7dff">■</tspan> allowed  · x = response time</text>
+
+  <!-- Bars grow over 2 s, hold, then restart (6 s loop). -->
+  <g id="panels">
+    <!-- Left: without TriSeal, two separate humps -->
+    <rect x="40" y="80" width="580" height="270" rx="10" fill="#0e151d" stroke="#2a3644"/>
+    <text x="64" y="118" class="sans" font-size="26" font-weight="700" fill="#e8eef5">Without TriSeal</text>
+    <text x="596" y="118" text-anchor="end" class="sans" font-size="40" font-weight="800" fill="#ff3b5c">100%</text>
+    <text x="596" y="142" text-anchor="end" class="mono" font-size="15" fill="#8a98a8">spy accuracy</text>
+    <line x1="64" y1="320" x2="596" y2="320" stroke="#3a4654" stroke-width="2"/>
+    <line x1="290" y1="160" x2="290" y2="320" stroke="#e8eef5" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="5 6"/>
+    <text x="298" y="176" class="mono" font-size="14" fill="#8a98a8">spy threshold</text>
+    <g fill="#ff3b5c">
+      <rect x="84" width="22" y="320" height="0"><animate attributeName="height" values="0;60;60;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;260;260;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+      <rect x="110" width="22" y="320" height="0"><animate attributeName="height" values="0;120;120;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;200;200;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+      <rect x="136" width="22" y="320" height="0"><animate attributeName="height" values="0;90;90;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;230;230;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+      <rect x="162" width="22" y="320" height="0"><animate attributeName="height" values="0;35;35;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;285;285;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+    </g>
+    <g fill="#3d7dff">
+      <rect x="400" width="22" y="320" height="0"><animate attributeName="height" values="0;40;40;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;280;280;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+      <rect x="426" width="22" y="320" height="0"><animate attributeName="height" values="0;95;95;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;225;225;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+      <rect x="452" width="22" y="320" height="0"><animate attributeName="height" values="0;125;125;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;195;195;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+      <rect x="478" width="22" y="320" height="0"><animate attributeName="height" values="0;80;80;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;240;240;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+      <rect x="504" width="22" y="320" height="0"><animate attributeName="height" values="0;30;30;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;290;290;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+    </g>
+    <text x="120" y="344" text-anchor="middle" class="mono" font-size="15" fill="#ff8a9d">refused · 14 ms</text>
+    <text x="464" y="344" text-anchor="middle" class="mono" font-size="15" fill="#8fb1ff">answered · 410 ms</text>
+
+    <!-- Right: with TriSeal, one spike where both classes leave on the same beat -->
+    <rect x="660" y="80" width="580" height="270" rx="10" fill="#0e151d" stroke="#2a3644"/>
+    <text x="684" y="118" class="sans" font-size="26" font-weight="700" fill="#e8eef5">With TriSeal</text>
+    <text x="1216" y="118" text-anchor="end" class="sans" font-size="40" font-weight="800" fill="#34d399">50%</text>
+    <text x="1216" y="142" text-anchor="end" class="mono" font-size="15" fill="#8a98a8">a coin flip</text>
+    <line x1="684" y1="320" x2="1216" y2="320" stroke="#3a4654" stroke-width="2"/>
+    <rect x="938" width="30" y="320" height="0" fill="#ff3b5c"><animate attributeName="height" values="0;80;80;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;240;240;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+    <rect x="938" width="30" y="320" height="0" fill="#3d7dff"><animate attributeName="height" values="0;80;80;0" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/><animate attributeName="y" values="320;160;160;320" keyTimes="0;0.33;0.9;1" dur="6s" repeatCount="indefinite"/></rect>
+    <text x="953" y="344" text-anchor="middle" class="mono" font-size="15" fill="#7ee0b0">everything leaves on the 500 ms beat</text>
+  </g>
+</svg>

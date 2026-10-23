@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 440" width="1280" height="440" role="img" aria-label="TriSeal: three parties, three seals, one finding you can prove">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0f15"/>
+      <stop offset="1" stop-color="#05070a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.35" r="0.6">
+      <stop offset="0" stop-color="#22d3c5" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#22d3c5" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#9ec7e6" stroke-opacity="0.06"/>
+      <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="40 40" dur="12s" repeatCount="indefinite"/>
+    </pattern>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .mono { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+      .sans { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="440" rx="18" fill="url(#bg)"/>
+  <rect width="1280" height="440" rx="18" fill="url(#grid)"/>
+  <rect width="1280" height="440" rx="18" fill="url(#glow)"/>
+  <rect x="0.5" y="0.5" width="1279" height="439" rx="18" fill="none" stroke="#22d3c5" stroke-opacity="0.25"/>
+
+  <!-- Wordmark: the three seal dots pulse in turn -->
+  <text x="640" y="128" text-anchor="middle" class="sans" font-size="104" font-weight="800" letter-spacing="-2" fill="#e8eef5" filter="url(#soft)">TRI<tspan fill="#ff3b5c" font-size="64" dy="-14">●<animate attributeName="fill-opacity" values="1;0.35;1" dur="3s" repeatCount="indefinite"/></tspan><tspan dy="14">SE</tspan><tspan fill="#f5b83d" font-size="64" dy="-14">●<animate attributeName="fill-opacity" values="0.35;1;0.35" dur="3s" repeatCount="indefinite"/></tspan><tspan dy="14">AL</tspan><tspan fill="#3d7dff" font-size="64" dy="-14">●<animate attributeName="fill-opacity" values="1;0.35;1" dur="3s" begin="1.5s" repeatCount="indefinite"/></tspan></text>
+
+  <text x="640" y="182" text-anchor="middle" class="sans" font-size="30" fill="#9aa8b8">Three parties. Three seals. <tspan fill="#22d3c5">One finding you can prove.</tspan></text>
+  <text x="640" y="220" text-anchor="middle" class="mono" font-size="18" letter-spacing="3" fill="#5f6e7e">SEALED RED-TEAMING FOR AI MODELS · RUNS IN YOUR BROWSER</text>
+
+  <!-- Live flow: Red and Blue send at random moments; the airlock releases only on the beat -->
+  <g class="mono" font-size="19" letter-spacing="2">
+    <!-- links -->
+    <path d="M236 306 H560" stroke="#ff3b5c" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="3 7"/>
+    <path d="M236 386 H560" stroke="#3d7dff" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="3 7"/>
+    <path d="M720 346 H1044" stroke="#f5b83d" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="3 7"/>
+    <!-- no direct Red -> Blue route -->
+    <path d="M160 328 V364" stroke="#ff3b5c" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="4 5"/>
+    <text x="178" y="352" fill="#ff3b5c" font-size="16">✕ no route</text>
+
+    <rect x="76" y="284" width="160" height="44" rx="6" fill="#ff3b5c" fill-opacity="0.12" stroke="#ff3b5c"/>
+    <text x="156" y="313" text-anchor="middle" fill="#ff8a9d">RED</text>
+    <rect x="76" y="364" width="160" height="44" rx="6" fill="#3d7dff" fill-opacity="0.12" stroke="#3d7dff"/>
+    <text x="156" y="393" text-anchor="middle" fill="#8fb1ff">BLUE</text>
+
+    <rect x="560" y="316" width="160" height="60" rx="6" fill="#f5b83d" fill-opacity="0.12" stroke="#f5b83d"/>
+    <text x="640" y="353" text-anchor="middle" fill="#f5c766" font-weight="700">AIRLOCK</text>
+    <!-- beat pulse -->
+    <rect x="560" y="316" width="160" height="60" rx="6" fill="none" stroke="#f5b83d">
+      <animate attributeName="stroke-width" values="6;1;1" keyTimes="0;0.3;1" dur="1s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-opacity" values="0.9;0;0" keyTimes="0;0.3;1" dur="1s" repeatCount="indefinite"/>
+    </rect>
+
+    <rect x="1044" y="324" width="160" height="44" rx="6" fill="#22d3c5" fill-opacity="0.12" stroke="#22d3c5"/>
+    <text x="1124" y="353" text-anchor="middle" fill="#7be8de">MODEL</text>
+
+    <!-- inbound packets arrive at irregular times and different sizes -->
+    <rect y="-6" width="18" height="12" fill="#ff3b5c"><animateMotion path="M240 306 H552" keyPoints="0;1;1" keyTimes="0;0.55;1" dur="2.3s" repeatCount="indefinite"/></rect>
+    <rect y="-5" width="30" height="10" fill="#ff3b5c" opacity="0.8"><animateMotion path="M240 306 H552" keyPoints="0;1;1" keyTimes="0;0.5;1" dur="3.1s" begin="0.9s" repeatCount="indefinite"/></rect>
+    <rect y="-6" width="12" height="12" fill="#3d7dff"><animateMotion path="M240 386 H552" keyPoints="0;1;1" keyTimes="0;0.6;1" dur="2.7s" begin="0.4s" repeatCount="indefinite"/></rect>
+    <rect y="-5" width="24" height="10" fill="#3d7dff" opacity="0.8"><animateMotion path="M240 386 H552" keyPoints="0;1;1" keyTimes="0;0.5;1" dur="1.9s" begin="1.3s" repeatCount="indefinite"/></rect>
+
+    <!-- outbound: one identical envelope per beat, never in between -->
+    <g>
+      <rect x="-20" y="-9" width="40" height="18" rx="2" fill="#bff5e2" fill-opacity="0.2" stroke="#7be8de"/>
+      <animateMotion path="M724 346 H1036" keyPoints="0;1;1" keyTimes="0;0.8;1" dur="1s" repeatCount="indefinite"/>
+    </g>
+
+    <text x="882" y="320" text-anchor="middle" fill="#7be8de" font-size="16">4096 B · every 1 beat</text>
+    <text x="398" y="420" text-anchor="middle" fill="#5f6e7e" font-size="16">any size · any time</text>
+  </g>
+</svg>

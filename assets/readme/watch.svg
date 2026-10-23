@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 620" width="1280" height="620" role="img" aria-label="Watch the TriSeal 90-second tour on YouTube">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1118"/>
+      <stop offset="1" stop-color="#05070a"/>
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#9ec7e6" stroke-opacity="0.05"/>
+    </pattern>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .mono { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+      .sans { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="620" rx="18" fill="url(#bg)"/>
+  <rect width="1280" height="620" rx="18" fill="url(#grid)"/>
+  <rect x="0.5" y="0.5" width="1279" height="619" rx="18" fill="none" stroke="#2a3644"/>
+
+  <text x="40" y="54" class="mono" font-size="18" letter-spacing="3" fill="#22d3c5">TRISEAL · 90-SECOND TOUR</text>
+  <text x="1240" y="54" text-anchor="end" class="mono" font-size="18" letter-spacing="2" fill="#5f6e7e">▶ youtube</text>
+
+  <!-- Scene 1 (0–3 s): the report that says "trust us" -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.04;0.3;0.34;1" dur="9s" repeatCount="indefinite"/>
+    <g transform="translate(640 280) rotate(-2)">
+      <rect x="-150" y="-190" width="300" height="380" fill="#eef1f5"/>
+      <text x="-122" y="-150" class="mono" font-size="11" fill="#8a94a3">EVALUATION REPORT / CONFIDENTIAL</text>
+      <text x="-122" y="-114" class="sans" font-size="26" font-weight="700" fill="#141a22">AI Safety Evaluation</text>
+      <rect x="-122" y="-90" width="244" height="7" fill="#d5dae1"/>
+      <rect x="-122" y="-74" width="190" height="7" fill="#d5dae1"/>
+      <rect x="-122" y="-58" width="220" height="7" fill="#d5dae1"/>
+      <g fill="#9aa6b5">
+        <rect x="-118" y="10" width="26" height="60"/><rect x="-80" y="-10" width="26" height="80"/>
+        <rect x="-42" y="20" width="26" height="50"/><rect x="-4" y="-25" width="26" height="95"/>
+        <rect x="34" y="-40" width="26" height="110" fill="#5d6b7e"/>
+      </g>
+      <rect x="-122" y="100" width="230" height="7" fill="#d5dae1"/>
+      <rect x="-122" y="116" width="170" height="7" fill="#d5dae1"/>
+      <g transform="translate(40 -10) rotate(-14)">
+        <rect x="-96" y="-28" width="192" height="56" rx="5" fill="#eef1f5" fill-opacity="0.85" stroke="#1f9d63" stroke-width="4"/>
+        <text x="0" y="12" text-anchor="middle" class="sans" font-size="34" font-weight="700" fill="#1f9d63">PASSED</text>
+        <animateTransform attributeName="transform" additive="sum" type="scale" values="2.2;2.2;1;1" keyTimes="0;0.12;0.17;1" dur="9s" repeatCount="indefinite"/>
+      </g>
+    </g>
+    <text x="640" y="520" text-anchor="middle" class="mono" font-size="28" letter-spacing="6" fill="#7c8a9a">Trust us.</text>
+  </g>
+
+  <!-- Scene 2 (3–6 s): three sealed cells, no shared path -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.33;0.37;0.63;0.67;1" dur="9s" repeatCount="indefinite"/>
+    <text x="640" y="140" text-anchor="middle" class="sans" font-size="54" font-weight="800" letter-spacing="12" fill="#e8eef5" filter="url(#glow)">TRISEAL</text>
+    <g fill="none" stroke-width="3" filter="url(#glow)">
+      <path d="M250 250 l90 -40 l90 40 v110 l-90 40 l-90 -40 z M250 250 l90 40 l90 -40 M340 290 v110" stroke="#ff3b5c"/>
+      <path d="M550 250 l90 -40 l90 40 v110 l-90 40 l-90 -40 z M550 250 l90 40 l90 -40 M640 290 v110" stroke="#22d3c5"/>
+      <path d="M850 250 l90 -40 l90 40 v110 l-90 40 l-90 -40 z M850 250 l90 40 l90 -40 M940 290 v110" stroke="#3d7dff"/>
+    </g>
+    <g class="mono" font-size="20" letter-spacing="3" text-anchor="middle">
+      <text x="340" y="450" fill="#ff8a9d">RED CELL</text>
+      <text x="640" y="450" fill="#7be8de">LLM CELL</text>
+      <text x="940" y="450" fill="#8fb1ff">BLUE CELL</text>
+    </g>
+    <path d="M440 305 H540 M740 305 H840" stroke="#7c8a9a" stroke-width="2" stroke-dasharray="5 8"/>
+    <text x="490" y="316" text-anchor="middle" class="sans" font-size="30" font-weight="700" fill="#ff3b5c">✕</text>
+    <text x="790" y="316" text-anchor="middle" class="sans" font-size="30" font-weight="700" fill="#ff3b5c">✕</text>
+    <text x="640" y="520" text-anchor="middle" class="mono" font-size="24" letter-spacing="4" fill="#ff8a9d">NO SHARED PATH</text>
+  </g>
+
+  <!-- Scene 3 (6–9 s): release certificate -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.66;0.7;0.96;1" dur="9s" repeatCount="indefinite"/>
+    <rect x="390" y="130" width="500" height="320" rx="10" fill="#2c4a34"/>
+    <text x="430" y="186" class="mono" font-size="20" letter-spacing="3" fill="#f4e6c8">TRISEAL CERTIFICATE</text>
+    <text x="430" y="232" class="mono" font-size="22" fill="#cfe9d6">grade: release</text>
+    <text x="430" y="268" class="mono" font-size="20" fill="#cfe9d6">6 / 6 checks · all measured</text>
+    <text x="430" y="302" class="mono" font-size="18" fill="#9fc9ab">ECDSA P-256 · 7f3a9c04e1b2…</text>
+    <g transform="translate(640 382) rotate(-5)">
+      <rect x="-200" y="-34" width="400" height="68" rx="4" fill="#f4e6c8"/>
+      <rect x="-190" y="-24" width="380" height="48" rx="3" fill="none" stroke="#2c4a34" stroke-width="3"/>
+      <text x="0" y="11" text-anchor="middle" class="sans" font-size="30" font-weight="800" fill="#2c4a34">VALID FOR RELEASE</text>
+      <animateTransform attributeName="transform" additive="sum" type="scale" values="2;2;1;1" keyTimes="0;0.74;0.78;1" dur="9s" repeatCount="indefinite"/>
+    </g>
+    <text x="640" y="520" text-anchor="middle" class="mono" font-size="24" letter-spacing="4" fill="#7be8de">ONE FINDING YOU CAN PROVE</text>
+  </g>
+
+  <!-- Player bar -->
+  <g transform="translate(0 560)">
+    <circle cx="70" cy="18" r="26" fill="#ff3b5c"/>
+    <path d="M62 4 L84 18 L62 32 Z" fill="#ffffff"/>
+    <rect x="120" y="14" width="960" height="8" rx="4" fill="#ffffff" fill-opacity="0.12"/>
+    <rect x="120" y="14" width="0" height="8" rx="4" fill="#22d3c5">
+      <animate attributeName="width" values="0;960" dur="9s" repeatCount="indefinite"/>
+    </rect>
+    <text x="1100" y="26" class="mono" font-size="20" fill="#9aa8b8">1:22 · watch</text>
+  </g>
+</svg>

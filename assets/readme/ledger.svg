@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 300" width="1280" height="300" role="img" aria-label="Changing one byte in a hash-chained ledger breaks every block after it and the Merkle root">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1118"/>
+      <stop offset="1" stop-color="#05070a"/>
+    </linearGradient>
+    <style>
+      .mono { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+      .sans { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif; }
+    </style>
+  </defs>
+  <rect width="1280" height="300" rx="18" fill="url(#bg)"/>
+  <rect x="0.5" y="0.5" width="1279" height="299" rx="18" fill="none" stroke="#2a3644"/>
+  <text x="40" y="50" class="mono" font-size="18" letter-spacing="3" fill="#22d3c5">CHANGE ONE BYTE. WATCH IT BREAK.</text>
+
+  <!-- 8 s loop: intact until 2.4 s, byte flips, damage cascades right, root fails, reset at 7.6 s. -->
+  <g class="mono">
+    <g>
+      <rect x="40" y="92" width="180" height="120" rx="8" fill="#0e151d" stroke="#ff3b5c" stroke-width="2"/>
+      <text x="58" y="126" font-size="18" fill="#ff8a9d">#0 COMMIT</text>
+      <text x="58" y="162" font-size="16" fill="#8a98a8">red payloads</text>
+      <text x="58" y="192" font-size="16" fill="#e8eef5">a91f…3c07</text>
+    </g>
+    <g>
+      <rect x="250" y="92" width="180" height="120" rx="8" fill="#0e151d" stroke="#3d7dff" stroke-width="2"/>
+      <text x="268" y="126" font-size="18" fill="#8fb1ff">#1 COMMIT</text>
+      <text x="268" y="162" font-size="16" fill="#8a98a8">blue defense</text>
+      <text x="268" y="192" font-size="16" fill="#e8eef5">5e20…bb41</text>
+    </g>
+    <!-- #2 is the one that gets edited -->
+    <g>
+      <rect x="460" y="92" width="180" height="120" rx="8" fill="#0e151d" stroke="#b46cff" stroke-width="2">
+        <animate attributeName="stroke" values="#b46cff;#b46cff;#ff3b5c;#ff3b5c;#b46cff" keyTimes="0;0.3;0.32;0.95;1" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="fill" values="#0e151d;#0e151d;#3a0b14;#3a0b14;#0e151d" keyTimes="0;0.3;0.32;0.95;1" dur="8s" repeatCount="indefinite"/>
+      </rect>
+      <text x="478" y="126" font-size="18" fill="#c99bff">#2 RELAY</text>
+      <text x="478" y="162" font-size="16" fill="#8a98a8">size 4096 B<animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.3;0.31;0.95;1" dur="8s" repeatCount="indefinite"/></text>
+      <text x="478" y="162" font-size="16" fill="#ff8a9d" opacity="0">size 409<tspan fill="#ff3b5c" font-weight="700">7</tspan> B ←<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.3;0.31;0.95;1" dur="8s" repeatCount="indefinite"/></text>
+      <text x="478" y="192" font-size="16" fill="#e8eef5">0c7d…92ea</text>
+    </g>
+    <g>
+      <rect x="670" y="92" width="180" height="120" rx="8" fill="#0e151d" stroke="#f5b83d" stroke-width="2">
+        <animate attributeName="stroke" values="#f5b83d;#f5b83d;#ff3b5c;#ff3b5c;#f5b83d" keyTimes="0;0.37;0.39;0.95;1" dur="8s" repeatCount="indefinite"/>
+      </rect>
+      <text x="688" y="126" font-size="18" fill="#f5c766">#3 DROP</text>
+      <text x="688" y="162" font-size="16" fill="#8a98a8">red → blue</text>
+      <text x="688" y="192" font-size="16" fill="#e8eef5">77b0…1d5e</text>
+    </g>
+    <g>
+      <rect x="880" y="92" width="180" height="120" rx="8" fill="#0e151d" stroke="#34d399" stroke-width="2">
+        <animate attributeName="stroke" values="#34d399;#34d399;#ff3b5c;#ff3b5c;#34d399" keyTimes="0;0.43;0.45;0.95;1" dur="8s" repeatCount="indefinite"/>
+      </rect>
+      <text x="898" y="126" font-size="18" fill="#7ee0b0">#4 HUNT</text>
+      <text x="898" y="162" font-size="16" fill="#8a98a8">spy 50.4%</text>
+      <text x="898" y="192" font-size="16" fill="#e8eef5">e3f9…6a20</text>
+    </g>
+    <g>
+      <rect x="1090" y="92" width="150" height="120" rx="8" fill="#0e151d" stroke="#22d3c5" stroke-width="2">
+        <animate attributeName="stroke" values="#22d3c5;#22d3c5;#ff3b5c;#ff3b5c;#22d3c5" keyTimes="0;0.49;0.51;0.95;1" dur="8s" repeatCount="indefinite"/>
+      </rect>
+      <text x="1108" y="126" font-size="18" fill="#7be8de">#5 GATE</text>
+      <text x="1108" y="162" font-size="16" fill="#8a98a8">release</text>
+      <text x="1108" y="192" font-size="16" fill="#e8eef5">19aa…f0c3</text>
+    </g>
+    <g stroke="#5f6e7e" stroke-width="2">
+      <line x1="222" y1="152" x2="248" y2="152"/><line x1="432" y1="152" x2="458" y2="152"/><line x1="642" y1="152" x2="668" y2="152"/>
+      <line x1="852" y1="152" x2="878" y2="152"/><line x1="1062" y1="152" x2="1088" y2="152"/>
+    </g>
+  </g>
+
+  <!-- Root badge -->
+  <g class="mono" font-size="20" letter-spacing="2">
+    <g>
+      <rect x="40" y="236" width="380" height="40" rx="6" fill="#123526" stroke="#34d399"/>
+      <text x="230" y="263" text-anchor="middle" fill="#7ee0b0">✓ MERKLE ROOT MATCHES</text>
+      <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.55;0.57;0.95;1" dur="8s" repeatCount="indefinite"/>
+    </g>
+    <g opacity="0">
+      <rect x="40" y="236" width="520" height="40" rx="6" fill="#3a0b14" stroke="#ff3b5c"/>
+      <text x="300" y="263" text-anchor="middle" fill="#ff8a9d">✕ ROOT MISMATCH · TAMPER DETECTED</text>
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.55;0.57;0.95;1" dur="8s" repeatCount="indefinite"/>
+    </g>
+  </g>
+  <text x="1240" y="263" text-anchor="end" class="mono" font-size="16" fill="#5f6e7e">every block stores the hash of the one before it</text>
+</svg>
