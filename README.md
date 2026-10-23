@@ -1,143 +1,216 @@
-# TriSeal (PS-4) — Sealed Multi-Party AI Safety Evaluation & Verification Engine
+# TriSeal — Sealed red-teaming for AI models
 
-> **"Three parties. Three seals. One finding you can prove."**
+> **Three parties. Three seals. One finding you can prove.**
 
-**Team Pinnacle** · Hack In Hills — PS-4 Submission · v2.4.0
-Rootless gVisor Cells · Dual-Homed Fixed-Cadence Airlock · SHA-256 Merkle Seal Ledger · Leak Hunter 95% CI
+TriSeal lets a red team, a blue team and the model under test run an AI safety evaluation **without anyone being able to cheat** — and produces evidence a third party can re-verify.
 
-## Table of Contents
+- **Sealed cells.** Red, Blue and the model never share a network; only the airlock touches all three.
+- **A size- and timing-blind airlock.** Every message is padded to a constant envelope and released only on a fixed cadence, so neither length nor latency leaks the defense's decision.
+- **Commit before you compete.** Red and Blue publish salted hashes of their attacks and defenses before they meet.
+- **Evidence in ink.** Every step is hash-chained and Merkle-checkpointed; change one byte and verification fails.
+- **A release gate.** Results feed a gate that issues an ECDSA-signed certificate only when every check passes.
 
-1. [Executive Summary & Problem Statement](#1-executive-summary--problem-statement)
-2. [Architecture & Zero-Trust Data Flow](#2-architecture--zero-trust-data-flow)
-3. [PS-4 Theme Alignment (7 Verticals & 6 Objectives)](#3-complete-ps-4-theme-alignment-all-7-verticals--6-objectives)
-4. [MVP Scope & Tiered Architecture](#4-mvp-scope--tiered-architecture)
-5. [Quick Start](#5-quick-start-deploy-to-vercel-or-run-locally-with-docker-compose)
-6. [Honest Threat Model & Residual Risk Matrix](#6-honest-threat-model--residual-risk-matrix)
-7. [Team Pinnacle — Engineering Ownership](#7-team-pinnacle--engineering-ownership)
-8. [Merkle Proof & CI/CD Release Gate Architecture](#8-merkle-proof--cicd-release-gate-architecture-tab-06)
+Everything in the web app runs **in your browser** with Web Crypto. Files you drop in are parsed locally and never uploaded.
 
-## 1. Executive Summary & Problem Statement
+## Watch the tour
 
-In contemporary AI safety evaluations, the **Red Team** (attackers), **Blue Team** (defenders), and the **Client's LLM** share a single Docker-based cloud sandbox. However, the validity of every safety finding depends entirely on strict isolation between them—and today that evidence is merely *"trust us."*
+<!-- After uploading to YouTube, replace YOUTUBE_VIDEO_ID below (two places) with the ID from the video URL:
+     https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID  -->
+[![TriSeal in 90 seconds — watch on YouTube](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID)
 
-1. **Red payloads can be seen by Blue:** When containers share networks or staging mounts, the defense adapts dynamically to attacks it should not have seen, making guardrail efficacy look artificially stronger than it really is (e.g., inflating block rates from `66%` to `96%`).
-2. **Blue logic can be inferred by Red:** Response timing differentials (`14ms` filter block vs. `410ms` LLM generation), packet lengths, shared files, or DNS/ICMP side channels let attackers reverse-engineer proprietary defense logic.
-3. **The LLM gets contaminated:** Shared multi-tenant KV-caches ([NDSS 2025](https://www.ndss-symposium.org)), leftover session context, and noisy-neighbor CPU/IO contention mean evaluation scores reflect environmental artifacts rather than the model itself.
-4. **Findings cannot be proven:** Standard container logs can be edited after the fact, leaving no tamper-evident audit trail to reconstruct or defend a safety claim under [EU AI Act](https://artificialintelligenceact.eu/), [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework), or ISO/IEC 42001 scrutiny.
+*TriSeal in 90 seconds — click to watch on YouTube.*
 
-**TriSeal** solves this in pure open-source software (`docker compose up` on any Linux host or laptop, with zero proprietary SGX/SEV hardware required) by running Red, Blue, and the Model simultaneously in **sealed rootless gVisor cells**, routing all traffic through a **normalizing, 4096-byte padded, 250ms fixed-cadence Airlock**, and issuing a cryptographically signed **TriSeal Certificate** verifiable by any third party.
+---
 
-## 2. Architecture & Zero-Trust Data Flow
+## Contents
+
+1. [Why](#why)
+2. [Quick start](#quick-start)
+3. [Using TriSeal](#using-triseal)
+4. [Bring your own data](#bring-your-own-data)
+5. [Verify in CI](#verify-in-ci)
+6. [Deploy to Vercel](#deploy-to-vercel)
+7. [Architecture](#architecture)
+8. [Threat model](#threat-model)
+9. [Project layout](#project-layout)
+10. [Status & roadmap](#status--roadmap)
+11. [Maintainers](#maintainers)
+
+## Why
+
+When attackers, defenders and a model share one sandbox, red-team scores quietly lie:
+
+1. **Peeking** — if Blue can read Red's raw requests, the defense studies the exam and block rates inflate.
+2. **Timing telegraph** — a refusal in 14 ms and an answer in 410 ms tell Red exactly what Blue blocked.
+3. **Memory weather** — leftover context and shared KV-cache let yesterday's prompts change today's answers.
+4. **Unprovable ink** — logs can be edited after the fact; a screenshot is not evidence.
+
+TriSeal closes each of these and measures what is left.
+
+## Quick start
+
+Requirements: **Node.js ≥ 20.19**. Python ≥ 3.10 is optional (API and CLI verifier).
+
+```bash
+npm run setup     # install site dependencies
+npm run dev       # http://localhost:5173
+```
+
+Or start the site and the API together:
+
+```bash
+./scripts/dev.sh            # macOS / Linux / Git Bash   (--no-api, --build)
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\dev.ps1   # Windows   (-NoApi, -Build)
+```
+
+| Command | What it does |
+| :--- | :--- |
+| `npm run dev` | Vite dev server for the site on port 5173 |
+| `npm run build` | Production build into `site/dist` |
+| `npm run preview` | Serve the production build locally |
+| `npm run api` | FastAPI backend on port 8000 (`pip install -r requirements.txt` first) |
+| `npm run verify` | Ledger self-test with the Python CLI |
+| `npm run verify:tamper` | Same, with a simulated tamper — exits 1 |
+
+## Using TriSeal
+
+The landing page (`/`) explains the system; **Open TriSeal** opens the workspace (`/app.html`) in a new tab. Each tool opens in its own tab so the live checklist stays beside you.
+
+| Tool | What it proves | Try it with |
+| :--- | :--- | :--- |
+| **Overview** | Live release checklist and the three-party sign-off | — |
+| **Airlock Relay** | Salted commit-reveal, HMAC capability tokens (with a forge test), header stripping, constant envelopes, cadence release, and a dataset runner that scores a committed defense | `prompts.csv` |
+| **Seal Ledger** | Hash chain + Merkle checkpoint + inclusion proofs; detects edits *and* "rewrite every hash downstream" forgeries | `ledger.json`, `ledger-tampered.json` |
+| **Conformance** | Diff of your running sandbox against `isolation-contract.yaml`, with critical/warning severity | `observed-config.yaml` |
+| **Leak Hunter** | Held-out timing attacker with bootstrap 95% CI and permutation test; twin-run KL against a shuffle noise floor | `timings-leaky.csv`, `timings-sealed.csv`, `twin-run.csv` |
+| **Release Gate** | Reads every check; missing or simulated evidence never passes; issues and verifies ECDSA P-256 signed certificates | certificates it issues |
+
+Results are stored in the browser (`localStorage`) and shared between tabs; **Start a fresh evaluation** on the overview clears them.
+
+### Measured vs simulated evidence
+
+Demo buttons, the in-page demo ledger, the reference sandbox and the bundled sample files are great for learning — but they are **simulated** and never count toward a release, even if a sample is downloaded and re-uploaded. Only your own files (or a real operation such as a relay) count as **measured**.
+
+- All six checks pass on measured evidence → **release certificate** (`grade: "release"`).
+- Nothing fails, but some checks are simulated → **rehearsal certificate**, signed and marked *REHEARSAL — NOT VALID FOR RELEASE*, listing the simulated checks.
+
+The grade is part of the signed payload, and the verifier checks it against the evidence. In CI, reject any certificate whose `grade` is not `release`.
+
+## Bring your own data
+
+Every tool accepts drag-and-drop, paste, or a sample file. Sample files live in [`site/public/samples/`](site/public/samples).
+
+| Tool | Format | Required columns (aliases accepted) |
+| :--- | :--- | :--- |
+| Airlock Relay | CSV, TSV, JSON, JSONL, TXT | `prompt` (`text`, `goal`, `input`, …); optional `label` (`attack`/`benign`, `1`/`0`) and `category` |
+| Leak Hunter — timing | CSV, TSV, JSON, JSONL | `latency_ms` (`latency`, `ms`, `duration`, …) and `label` (`blocked`/`allowed`, `1`/`0`) |
+| Leak Hunter — twin-run | CSV, JSON | `run_a` and `run_b`, or long form `run` + `value` |
+| Seal Ledger | JSON, JSONL, CSV | `seq, cell, type, detail, prev, hash` (`event_type`, `prev_hash`, `entry_hash` also work); optional `printed_root` |
+| Conformance | YAML, JSON | Same shape as `isolation-contract.yaml`, with or without `invariants:` |
+
+The ledger verifier accepts both this site's format (`|` separator) and the CLI/API format (`||`).
+
+## Verify in CI
+
+```bash
+python cli/triseal_verify.py --self-test                    # exit 0 when the chain verifies
+python cli/triseal_verify.py --self-test --simulate-tamper  # exit 1 — proves the check bites
+```
+
+With the API running, `POST /api/verify` returns `{"valid": false, "failed_at_seq": n}` when the ledger has been altered.
+
+## Deploy to Vercel
+
+The repository is ready to import as-is.
+
+1. Import the repo in Vercel (root directory = repository root; no framework preset).
+2. `vercel.json` already sets the install command, the build command, `site/dist` as output, the Python function in `api/index.py`, security headers (CSP, HSTS, frame denial) and long-lived caching for hashed assets.
+3. Set the Node.js version in project settings to 20.x or 22.x.
+
+Or from the CLI:
+
+```bash
+npm i -g vercel
+vercel          # preview
+vercel --prod   # production
+```
+
+Before shipping, run `npm run build` and `npm run preview` locally and walk through every tool once.
+
+## Architecture
 
 ```mermaid
 flowchart LR
-    RED["<b>1. RED CELL</b><br/>JailbreakBench / AdvBench<br/>rootless · gVisor · red_net"]
-    BLUE["<b>2. BLUE CELL</b><br/>Normalized Traffic Filter<br/>rootless · gVisor · blue_net"]
-    AIR["<b>3. DUAL-HOMED AIRLOCK</b><br/>• Macaroon + OPA Policy Check<br/>• Strip Identifying Headers<br/>• Deterministic 4096B Pad<br/>• Fixed-Cadence 250ms Release<br/>Bilateral Commit-Reveal (SHA-256 Pre-Test Binding)"]
-    GW["<b>4. MODEL GATEWAY</b><br/>• Per-Session Context Wipe<br/>• Salted KV-Cache Scoping<br/>• Egress Output Sanitizer<br/>LLM Cell (llm_net): Ollama / vLLM (Qwen/Llama)<br/>Twin-Run Baseline Check"]
-    CERT["<b>5. CERTIFICATE</b><br/>• ed25519 Signed<br/>• Merkle Root<br/>• Leak 95% CI<br/>• Twin-Run Proof<br/>PUBLIC VERIFY"]
-    LEDGER[("HASH-CHAINED SEAL LEDGER<br/>SHA-256 + Signed Merkle Checkpoints<br/>+ One-Way Falco eBPF Diode")]
+    RED["RED CELL<br/>attacks · red_net"]
+    BLUE["BLUE CELL<br/>defense · blue_net"]
+    AIR["AIRLOCK<br/>token check · strip headers<br/>pad 4096 B · release on 250 ms tick<br/>commit-reveal"]
+    GW["MODEL GATEWAY<br/>session wipe · salted KV-cache<br/>llm_net"]
+    LEDGER[("SEAL LEDGER<br/>SHA-256 chain + Merkle root")]
+    GATE["RELEASE GATE<br/>signed certificate"]
 
     RED --> AIR
-    RED -. "✖ DIRECT PATH DROPPED" .-x BLUE
+    RED -. "direct path dropped" .-x BLUE
     AIR --> BLUE
     AIR --> GW
-    GW --> CERT
     AIR -.-> LEDGER
-    LEDGER -.-> CERT
+    LEDGER -.-> GATE
 ```
 
-### The 8-Stage TriSeal Protocol
-
-| Stage | Protocol Step | Technical Mechanism | FastAPI Endpoint / Tooling |
-| :--- | :--- | :--- | :--- |
-| **01** | **Contract** | An explicit `isolation-contract.yaml` declares allowed network flows, syscalls, and cgroup v2 caps. | `GET /api/contract/check` |
-| **02** | **Seal** | Each party runs in a rootless [gVisor (`runsc`)](https://gvisor.dev) container; live state is verified against the contract. | Docker + `runsc` + `seccomp` |
-| **03** | **Bind** | Red commits a SHA-256 hash of its salted payload set; Blue commits a SHA-256 hash of its defense config. | `POST /api/commit` |
-| **04** | **Relay** | Traffic crosses the Dual-Homed Airlock: Macaroon token check, [OPA](https://www.openpolicyagent.org) policy, strip headers, pad to `4096B`, pace at `250ms`. | `POST /api/relay` → `/api/defend` |
-| **05** | **Record** | Every event is appended to a SHA-256 hash-chained ledger with `ed25519`-signed Merkle checkpoints ([RFC 6962](https://datatracker.ietf.org/doc/html/rfc6962)). | `POST /api/ledger/append` |
-| **06** | **Hunt** | **Leak Hunter** probes timing, volume, cache, and DNS/ICMP channels, reporting accuracy with a 95% bootstrap CI. | `POST /api/leakhunt` (SciPy) |
-| **07** | **Twin-Run** | Attacks replay in a solo clean-room baseline container; KL-divergence flags any cross-session contamination. | `POST /api/twinrun` |
-| **08** | **Certify** | Reveals are checked against pre-test commitments and bundled into a portable, `ed25519`-signed **TriSeal Certificate**. | `GET /api/certificate`, `POST /api/verify` |
-
-## 3. Complete PS-4 Theme Alignment (All 7 Verticals & 6 Objectives)
-
-| PS-4 Security Vertical | TriSeal Engineering Implementation | Verification Method |
+| Stage | Step | Mechanism |
 | :--- | :--- | :--- |
-| **1. Container & Sandbox Isolation** | Rootless containers, [gVisor (`runsc`)](https://gvisor.dev) (fallback: hardened `runc`), `seccomp` allowlists, `cap_drop: [ALL]`, `read_only` rootfs, cgroup v2 | Runtime Conformance Checker (`GET /api/contract/check`) |
-| **2. Network Segmentation** | One internal bridge network per cell (`red_net`, `blue_net`, `llm_net`), default-deny `nftables` / [Cilium](https://cilium.io); only Airlock is dual-homed | Deterministic Red→Blue socket breach test (`DROP` + log) |
-| **3. Access Control & Secrets** | Short-lived Macaroon capability tokens scoped per cell and action, [Open Policy Agent (OPA)](https://www.openpolicyagent.org), HashiCorp Vault / SOPS | Airlock policy gate (`policy/airlock.rego`) |
-| **4. Audit Trails & Provenance** | Append-only SHA-256 hash chain, `ed25519`-signed Merkle tree checkpoints, bilateral commit-reveal, offline public verifier | `python3 cli/triseal_verify.py --cert cert.json` |
-| **5. Resource Governance & Fairness** | cgroup v2 CPU/memory/IO limits, CPU pinning, `250ms` fixed-cadence Airlock release, host noise-floor calibration (`0.42ms σ`) | Validity Score & Cadence jitter monitor |
-| **6. LLM-Specific Threats** | Model Gateway per-session context wipe, tenant-scoped KV-cache salting/flush ([vLLM](https://docs.vllm.ai) / Ollama), output sanitization, Twin-Run | Twin-Run Differential Check (`KL-Div < 0.020`) |
-| **7. Observability & Anomaly Detection** | [Falco](https://falco.org) eBPF syscall/network anomaly detection, one-way data diode to dashboard, armed **Canary Honeytokens** in every vault | Canary tripwire & one-way diode stream |
+| 01 | Contract | `isolation-contract.yaml` declares runtime, networks, envelope and cadence |
+| 02 | Seal | Each party runs in its own rootless container on its own network (`docker-compose.yml`) |
+| 03 | Bind | Red and Blue publish salted SHA-256 commitments |
+| 04 | Relay | Capability token, OPA policy (`policy/airlock.rego`), header strip, pad, cadence release |
+| 05 | Record | Hash-chained ledger with Merkle checkpoints |
+| 06 | Hunt | Timing distinguishability with bootstrap CI |
+| 07 | Twin-run | KL divergence between a fresh and a shared run |
+| 08 | Certify | Release gate issues a signed certificate over all evidence |
 
-## 4. MVP Scope & Tiered Architecture
+## Threat model
 
-- **Tier 1 — Working Core MVP (Implemented & Interactive in Tabs 01 & 02):**
-  1. Multi-network `docker-compose.yml` isolating `red_cell`, `blue_cell`, `llm_cell`, `airlock`, and `seal_ledger`.
-  2. Deterministic Red-to-Blue direct connection attempt that fails at the network layer and is logged to the ledger.
-  3. Airlock relay with Macaroon token check, OPA policy, `4096B` padding, `250ms` fixed-cadence release, and bilateral commit-reveal using [JailbreakBench](https://jailbreakbench.github.io) and [AdvBench](https://github.com/llm-attacks/llm-attacks) subsets.
-  4. Local LLM cell (`Qwen-2.5-3B` / `Llama-3.2-3B` via Ollama/vLLM) behind a Model Gateway enforcing per-session context wipe.
-  5. SHA-256 hash-chained Seal Ledger and `triseal_verify.py` CLI that detects single-byte historical tampering.
-  6. Portable **TriSeal Certificate** generation and public signature/Merkle verification.
-- **Tier 2 — Differentiators (Implemented & Interactive in Tabs 03 & 04):**
-  7. Declarative `isolation-contract.yaml` and live Runtime Conformance Checker with container drift injection testing.
-  8. **Isolation ON ("Sealed Mode") vs. Isolation OFF ("Naked Mode")** experimental benchmark comparison.
-  9. **Leak Hunter** empirical distinguishability suite reporting `50.6% accuracy vs 50.0% chance (95% CI: 47.5%–53.7%, N=1000)`.
-  10. **Twin-Run Differential Check** replaying identical prompts in a clean solo baseline to detect contamination.
-  11. Armed **Canary Honeytokens** in every vault and live 5×5 **Isolation Matrix** dashboard.
-- **Tier 3 — Enterprise Hardening (Implemented in Tab 05 & Repo):**
-  12. Fixed-cadence traffic shaping, noise-floor calibration (`0.42ms σ`), Falco eBPF rules, signed Merkle checkpoints, and CI/CD release gate (`triseal ci-gate --strict`).
+| Protects against | Does not protect against |
+| :--- | :--- |
+| Cross-team visibility via network, filesystem and direct API paths | Hardware micro-architectural side channels on shared CPU cores |
+| Cross-session contamination from shared KV-cache or leftover context | A compromised host kernel or container-runtime escape |
+| Post-hoc log tampering, cherry-picking or swapping the defense after a run | A malicious operator of the trusted airlock and ledger |
+| Timing and size side channels above the measured noise floor | Covert channels below Leak Hunter's statistical resolution |
 
-## 5. Quick Start: Deploy to Vercel or Run Locally with Docker Compose
+## Project layout
 
-### Option A: One-Click / CLI Deployment to Vercel
-
-This repository is pre-configured with `vercel.json`, `index.html`, and the Python FastAPI serverless backend (`api/index.py`).
-
-```bash
-# 1. Install Vercel CLI (if not already installed)
-npm i -g vercel
-
-# 2. Deploy preview or production build directly
-vercel --prod
+```
+site/            Vite multi-page web app (landing, overview, five tools)
+  src/           engine.js (crypto + stats), shared.js (layout), upload.js (BYOD), one module per page
+  public/samples Sample datasets for every tool
+api/index.py     FastAPI backend (Vercel serverless function)
+cli/             Dependency-free Python verifier
+policy/          OPA policy for the airlock
+scripts/         dev.sh / dev.ps1 launchers
+isolation-contract.yaml  The published isolation contract
+docker-compose.yml       Sealed cells and networks for local runs
 ```
 
-### Option B: Local Full-Stack Execution (`docker compose up`)
+## Status & roadmap
 
-```bash
-# 1. Launch all 3 sealed cells, Dual-Homed Airlock, and Seal Ledger
-docker compose up --build -d
+Works today in the browser: every tool above, with real SHA-256, HMAC-SHA256 and ECDSA P-256 via Web Crypto.
 
-# 2. Verify live container conformance against isolation-contract.yaml
-python3 cli/triseal_verify.py --check-contract
+Known limitations:
 
-# 3. Verify a generated TriSeal Certificate & test tamper detection
-python3 cli/triseal_verify.py --cert ./triseal_certificate_ps4.json --simulate-tamper
-```
+- The API's `/api/leakhunt` and `/api/twinrun` return fixed reference numbers, and `/api/certificate` uses a SHA-256 digest rather than a real signature. Treat the web tools as the source of truth until these are wired up.
+- Macaroon root keys and certificate signing keys are generated per page load. For production, pin a server-held signing key and publish its public key.
+- The CLI's `--cert` and `--check-contract` flags are reserved; only `--self-test` is implemented.
 
-## 6. Honest Threat Model & Residual Risk Matrix
+Roadmap: server-side signing with a pinned key, transparency-log anchoring for Merkle roots, live container conformance via the Docker API, and a CI gate command.
 
-| Protects Against (Verified Invariants) | Does Not Protect Against / Where Guarantees Fail |
+## Maintainers
+
+| Maintainer | Area |
 | :--- | :--- |
-| Cross-team payload and defense visibility via container network, filesystem, and direct API paths | Hardware microarchitectural side channels (Spectre/Meltdown-class) on shared physical CPU cores |
-| Cross-session LLM contamination from shared KV-cache prefixes or leftover context | Compromised host Linux kernel, container-runtime escape, or engines without native cache isolation |
-| Post-hoc log tampering, cherry-picking, or defense config alteration after a test run | Malicious cloud infrastructure operator or compromise of the minimal Trusted Computing Base (Airlock/Ledger) |
-| Timing, packet volume, resource, and DNS/ICMP covert channels ([arXiv:2409.20002](https://arxiv.org/abs/2409.20002)) | Sub-noise-floor covert channels operating below Leak Hunter's measured statistical threshold |
+| **Jyotasana** | Infrastructure & isolation — compose networks, runtime hardening, conformance, canaries |
+| **Arpita Matta** | Core backend — airlock, commit-reveal, model gateway |
+| **Anand Minejes** | Evidence & frontend — ledger, verifier, Leak Hunter, twin-run, web app |
 
-## 7. Team Pinnacle — Engineering Ownership
-
-| Member | Role | Core Deliverables |
-| :--- | :--- | :--- |
-| **Jyotasana** | **A: Infra & Isolation** | `docker-compose.yml` with separate internal bridge networks, rootless/gVisor/seccomp profiles, Red-to-Blue block & log, Conformance Checker, Canary Honeytokens, Naked-Mode toggle |
-| **Arpita Matta** | **B: Core Backend** | Dual-Homed Airlock (Macaroon token check, OPA policy, normalize, `4096B` pad, `250ms` fixed-cadence release), bilateral commit-reveal, Model Gateway with session wipe, Ollama/vLLM integration |
-| **Anand Minejes** | **C: Evidence & Frontend** | SHA-256 hash-chained Seal Ledger, signed Merkle checkpoints (`ed25519`), `triseal_verify.py` CLI tamper detector, TriSeal Certificate, Leak Hunter, Twin-Run, and Isolation Matrix UI |
-
-## 8. Merkle Proof & CI/CD Release Gate Architecture (`Tab 06`)
-
-| Component | Capabilities |
-| :--- | :--- |
-| **1. Merkle Seal Ledger** | • SHA-256 Event Chain<br>• Bilateral Reveals Matched<br>• `ed25519` Signed Checkpoint<br>• ✔ QR + Offline Public Verify |
-| **2. CI/CD Release Gate** | • GitHub Actions / GitLab CI<br>• Leak 95% CI < 55% Bound<br>• Twin-Run KL-Div < 0.020<br>• ⚡ Blocks Tampered Releases |
-| **3. SIEM & K8s MicroVMs** | • Splunk HEC / Elastic ECS<br>• Kata / Firecracker microVMs<br>• Cilium Zero-Trust L7 Policy<br>• 🌐 Sigstore Rekor Anchoring |
+Licensed under MIT.

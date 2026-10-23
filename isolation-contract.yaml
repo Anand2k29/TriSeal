@@ -1,5 +1,5 @@
 contract_version: "2.4.0"
-project: "TriSeal PS-4 Sealed Evaluation Sandbox"
+project: "TriSeal Sealed Evaluation Sandbox"
 invariants:
   container_isolation:
     rootless: true

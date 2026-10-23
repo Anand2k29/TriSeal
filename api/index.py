@@ -1,11 +1,11 @@
-"""TriSeal (PS-4) — FastAPI Backend for Airlock, Conformance, Seal Ledger, Leak Hunter & Certificate Verifier."""
+"""TriSeal — FastAPI backend for Airlock, Conformance, Seal Ledger, Leak Hunter & Certificate Verifier."""
 from fastapi import FastAPI
 from pydantic import BaseModel
 import hashlib
 import time
 
 app = FastAPI(
-    title="TriSeal PS-4 Core Backend & Airlock API",
+    title="TriSeal API",
     description="Three parties. Three seals. One finding you can prove.",
     version="2.4.0"
 )

@@ -1,170 +1,214 @@
 import './style.css';
-import { renderNav, renderFooter, initScrollReveal, showToast } from './shared.js';
+import { wrapPage, showToast, plateHead, refreshNav, evidenceChip } from './shared.js';
+import { saveSession, loadSession, escapeHtml, sha256, hexPreview, evidenceOf } from './engine.js';
+import { uploadPanel, bindUpload, parseYaml, downloadFile } from './upload.js';
 
 const app = document.getElementById('app');
-let driftInjected = false;
+const session = loadSession();
 
-const invariants = [
-  { name: 'Container Runtime', expected: 'runsc (gVisor)', status: 'PASS', color: 'emerald' },
-  { name: 'Root Filesystem', expected: 'read-only', status: 'PASS', color: 'emerald' },
-  { name: 'Linux Capabilities', expected: 'cap_drop: ALL', status: 'PASS', color: 'emerald' },
-  { name: 'Network Isolation', expected: '3 separate networks, no direct Red→Blue', status: 'PASS', color: 'emerald' },
-  { name: 'Seccomp Profile', expected: 'SHA-256: 7d865e95...', status: 'PASS', color: 'emerald' },
-  { name: 'Privilege Escalation', expected: 'no-new-privileges: true', status: 'PASS', color: 'emerald' },
+/** Invariants that break isolation outright; everything else is a warning. */
+const CRITICAL = [
+  'container_isolation.runtime', 'container_isolation.read_only_rootfs', 'container_isolation.cap_drop',
+  'container_isolation.rootless', 'container_isolation.seccomp_sha256',
+  'network_segmentation.red_cell', 'network_segmentation.blue_cell', 'network_segmentation.llm_cell',
+  'network_segmentation.direct_red_blue_allowed',
+  'airlock_shaping.pad_envelope_bytes', 'airlock_shaping.fixed_cadence_ms',
+  'llm_hygiene.per_session_context_wipe',
 ];
+const IGNORE = ['contract_version', 'project'];
 
-const canaries = [
-  { name: 'Red Vault Honeytoken', location: '/secrets/red_canary_7f3a', status: 'ARMED', triggered: false },
-  { name: 'Blue Config Honeytoken', location: '/secrets/blue_canary_d91b', status: 'ARMED', triggered: false },
-  { name: 'LLM Weight Honeytoken', location: '/secrets/llm_canary_4e2c', status: 'ARMED', triggered: false },
-];
+let contract = null;
+let contractName = 'isolation-contract.yaml';
+let observed = null;
+let observedName = '';
+let observedEvidence = 'simulated';
+let canaryTripped = !!session.canaryTripped;
 
-function render() {
-  const currentInvariants = invariants.map((inv, i) => {
-    if (driftInjected && i === 1) return { ...inv, expected: 'READ-WRITE /tmp mounted!', status: 'FAIL', color: 'rose' };
-    if (driftInjected && i === 2) return { ...inv, expected: 'cap_add: SYS_PTRACE detected!', status: 'FAIL', color: 'rose' };
-    return inv;
-  });
-  const allPass = currentInvariants.every(i => i.status === 'PASS');
-
-  app.innerHTML = `
-${renderNav('conformance')}
-<main class="container" style="padding-top:2rem;padding-bottom:4rem">
-
-  <div class="panel panel-glow-cyan corner-ticks" style="padding:1.5rem;margin-bottom:1.5rem;border-left:3px solid var(--neon-blue)">
-    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:0.5rem">
-      <span class="badge badge-blue">TIER-2 · CONFORMANCE</span>
-      <span class="font-mono" style="font-size:0.6875rem;color:var(--text-dim)">GET /api/contract/check</span>
-    </div>
-    <h1 style="font-size:1.75rem;font-weight:800;margin-bottom:0.5rem">Live Conformance Checker & Naked-Mode Comparison</h1>
-    <p style="font-size:0.875rem;color:var(--text-muted);max-width:800px">Verifies running containers match the isolation-contract.yaml. Compare Sealed vs Naked timing to see why fixed-cadence matters.</p>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:1rem">
-      <button id="btnDrift" class="btn" style="background:rgba(244,63,94,0.15);color:var(--neon-rose-bright);border:1px solid var(--neon-rose)">${driftInjected ? '↺ Restore Conformance' : '⚡ Inject Container Drift'}</button>
-      <button id="btnCalibrate" class="btn btn-secondary">🔧 Recalibrate Noise Floor</button>
-    </div>
-  </div>
-
-  <!-- Conformance Status -->
-  <div class="panel" style="padding:1rem;margin-bottom:1.5rem;border:1px solid ${allPass ? 'rgba(16,185,129,0.4)' : 'rgba(244,63,94,0.5)'};background:${allPass ? 'rgba(16,185,129,0.06)' : 'rgba(244,63,94,0.08)'}">
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span class="badge ${allPass ? 'badge-emerald' : 'badge-rose'}" style="font-size:0.75rem;font-weight:700">${allPass ? 'CONTRACT: VALID ✔' : 'CONTRACT: VIOLATED ✖'}</span>
-        <span class="font-mono" style="font-size:0.75rem;color:var(--text-secondary)">${allPass ? 'All 6 invariants verified against isolation-contract.yaml' : 'Container drift detected — 2 invariants violated'}</span>
-      </div>
-      <span class="font-mono" style="font-size:0.75rem;font-weight:700;color:${allPass ? 'var(--neon-emerald)' : 'var(--neon-rose)'}">${currentInvariants.filter(i => i.status === 'PASS').length}/6 PASS</span>
-    </div>
-  </div>
-
-  <!-- Invariants Grid -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
-    <div class="panel" style="padding:1.25rem">
-      <div class="font-mono" style="font-size:0.75rem;font-weight:700;color:var(--neon-blue-bright);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-subtle)">ISOLATION CONTRACT INVARIANTS</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        ${currentInvariants.map(inv => `
-          <div class="panel-elevated" style="padding:8px 12px;border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center;${inv.status === 'FAIL' ? 'border:1px solid rgba(244,63,94,0.4);background:rgba(244,63,94,0.06)' : ''}">
-            <div>
-              <div class="font-mono" style="font-size:0.6875rem;font-weight:600;color:var(--text-primary)">${inv.name}</div>
-              <div class="font-mono" style="font-size:0.5625rem;color:${inv.status === 'FAIL' ? 'var(--neon-rose)' : 'var(--text-dim)'}">${inv.expected}</div>
-            </div>
-            <span class="badge badge-${inv.color}" style="font-size:0.5625rem">${inv.status}</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-
-    <div class="panel" style="padding:1.25rem">
-      <div class="font-mono" style="font-size:0.75rem;font-weight:700;color:var(--neon-amber-bright);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-subtle)">🍯 CANARY HONEYTOKEN STATUS</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${canaries.map(c => `
-          <div class="panel-elevated" style="padding:10px 12px;border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div class="font-mono" style="font-size:0.6875rem;font-weight:600;color:var(--text-primary)">${c.name}</div>
-              <div class="font-mono" style="font-size:0.5625rem;color:var(--text-dim)">${c.location}</div>
-            </div>
-            <span class="badge badge-emerald" style="font-size:0.5625rem">${c.status} · NOT TRIGGERED</span>
-          </div>
-        `).join('')}
-      </div>
-      <div class="font-mono" style="font-size:0.625rem;color:var(--text-dim);margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid var(--border-subtle)">
-        If any cell reads a honeytoken it shouldn't have access to, the canary triggers and the evaluation is flagged.
-      </div>
-    </div>
-  </div>
-
-  <!-- Naked vs Sealed Comparison -->
-  <div class="panel" style="padding:1.25rem">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border-subtle)">
-      <div>
-        <div class="font-mono" style="font-size:0.625rem;color:var(--neon-rose);text-transform:uppercase;letter-spacing:0.1em">NAKED MODE vs SEALED MODE</div>
-        <h2 style="font-size:1.125rem;font-weight:700;margin-top:4px">Response Latency Distribution Comparison</h2>
-      </div>
-      <div style="display:flex;gap:12px;align-items:center">
-        <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;background:var(--neon-rose);border-radius:2px"></div><span class="font-mono" style="font-size:0.625rem;color:var(--text-dim)">Naked (Bimodal)</span></div>
-        <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;background:var(--neon-emerald);border-radius:2px"></div><span class="font-mono" style="font-size:0.625rem;color:var(--text-dim)">Sealed (Unimodal)</span></div>
-      </div>
-    </div>
-    <div id="histogramBox">
-      <svg viewBox="0 0 760 170" style="width:100%;height:auto;font-family:'JetBrains Mono',monospace">
-        <rect width="760" height="170" fill="var(--bg-void)"/>
-        <line x1="40" y1="138" x2="730" y2="138" stroke="#334155" stroke-width="1.5"/>
-        <!-- Naked Peak 1: Fast Block -->
-        <rect x="75" y="55" width="22" height="83" fill="#F43F5E" fill-opacity="0.7" rx="2"/>
-        <rect x="100" y="70" width="22" height="68" fill="#F43F5E" fill-opacity="0.5" rx="2"/>
-        <text x="65" y="42" fill="#FDA4AF" font-size="9" font-weight="bold">Naked Block (~14ms)</text>
-        <!-- Sealed Spike -->
-        <rect x="355" y="16" width="32" height="122" fill="#10B981" rx="2"/>
-        <text x="260" y="10" fill="#34D399" font-size="9.5" font-weight="bold">✔ TriSeal Paced (250.0ms ± 0.42ms σ)</text>
-        <!-- Naked Peak 2: Slow Infer -->
-        <rect x="575" y="60" width="22" height="78" fill="#F43F5E" fill-opacity="0.7" rx="2"/>
-        <rect x="600" y="48" width="22" height="90" fill="#F43F5E" fill-opacity="0.8" rx="2"/>
-        <rect x="625" y="74" width="22" height="64" fill="#F43F5E" fill-opacity="0.5" rx="2"/>
-        <text x="545" y="36" fill="#FDA4AF" font-size="9" font-weight="bold">Naked Infer (~412ms)</text>
-        <!-- Labels -->
-        <text x="75" y="155" fill="#94A3B8" font-size="9">14ms</text>
-        <text x="350" y="155" fill="#34D399" font-size="9.5" font-weight="bold">250.0ms</text>
-        <text x="590" y="155" fill="#94A3B8" font-size="9">412ms</text>
-      </svg>
-    </div>
-    <div class="panel-elevated" style="padding:1rem;margin-top:1rem;border-radius:var(--radius-sm)">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;text-align:center">
-        <div>
-          <div class="font-mono" style="font-size:0.5625rem;color:var(--text-dim)">NOISE FLOOR σ</div>
-          <div id="noiseFloor" class="font-mono" style="font-size:1.25rem;font-weight:700;color:var(--neon-amber-bright)">0.42ms</div>
-        </div>
-        <div>
-          <div class="font-mono" style="font-size:0.5625rem;color:var(--text-dim)">VALIDITY SCORE</div>
-          <div id="validScore" class="font-mono" style="font-size:1.25rem;font-weight:700;color:var(--neon-emerald)">98.7/100</div>
-        </div>
-        <div>
-          <div class="font-mono" style="font-size:0.5625rem;color:var(--text-dim)">DISTINGUISHABILITY</div>
-          <div class="font-mono" style="font-size:1.25rem;font-weight:700;color:var(--neon-emerald)">NONE</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</main>
-${renderFooter()}
-  `;
-
-  document.getElementById('btnDrift').addEventListener('click', () => {
-    driftInjected = !driftInjected;
-    showToast(
-      driftInjected ? 'DRIFT INJECTED' : 'CONFORMANCE RESTORED',
-      driftInjected ? 'Container restarted with writable /tmp and SYS_PTRACE.' : 'Canonical container state restored.',
-      driftInjected ? 'rose' : 'emerald'
-    );
-    render();
-  });
-
-  document.getElementById('btnCalibrate').addEventListener('click', () => {
-    const sigma = (0.36 + Math.random() * 0.12).toFixed(2);
-    const score = (98.9 - parseFloat(sigma) * 0.8).toFixed(1);
-    document.getElementById('noiseFloor').textContent = sigma + 'ms';
-    document.getElementById('validScore').textContent = score + '/100';
-    showToast('CALIBRATED', `Host jitter σ = ${sigma}ms (Score: ${score}/100).`, 'amber');
-  });
+function parseConfig(text, name) {
+  const t = text.replace(/^﻿/, '').trim();
+  if (!t) throw new Error('the file is empty');
+  if (t.startsWith('{') || t.startsWith('[')) {
+    const data = JSON.parse(t);
+    return Array.isArray(data) ? data[0] : data;
+  }
+  if (/\.(json)$/i.test(name)) throw new Error('invalid JSON');
+  return parseYaml(t);
 }
 
-render();
-initScrollReveal();
+/** Flatten nested objects to dotted paths; the contract's "invariants" wrapper is optional on either side. */
+function flatten(obj, prefix = '', out = {}) {
+  const root = prefix === '' && obj && obj.invariants ? obj.invariants : obj;
+  for (const [k, v] of Object.entries(root || {})) {
+    if (prefix === '' && IGNORE.includes(k)) continue;
+    const key = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === 'object' && !Array.isArray(v)) flatten(v, key, out);
+    else out[key] = v;
+  }
+  return out;
+}
+
+const show = (v) => (v === undefined ? '— missing —' : Array.isArray(v) ? `[${v.join(', ')}]` : String(v));
+const same = (a, b) => JSON.stringify(Array.isArray(a) ? [...a].sort() : a) === JSON.stringify(Array.isArray(b) ? [...b].sort() : b);
+
+function diff() {
+  const want = flatten(contract);
+  const got = flatten(observed);
+  const rows = Object.keys(want).map((k) => {
+    const ok = same(want[k], got[k]);
+    return { key: k, want: want[k], got: got[k], ok, severity: ok ? '' : CRITICAL.includes(k) ? 'critical' : 'warning' };
+  });
+  const extra = Object.keys(got).filter((k) => !(k in want));
+  return { rows, extra };
+}
+
+function render() {
+  const out = document.getElementById('result');
+  if (!observed) {
+    out.innerHTML = '<p class="empty">No observed configuration yet. Upload one above, or load the reference sandbox to see a clean pass.</p>';
+    return;
+  }
+  const { rows, extra } = diff();
+  const bad = rows.filter((r) => !r.ok);
+  const critical = bad.filter((r) => r.severity === 'critical').length;
+  saveSession({ drift: bad.length > 0, driftCount: bad.length, canaryTripped, conformanceSource: observedName, conformanceEvidence: observedEvidence });
+  refreshNav();
+
+  out.innerHTML = `
+    <div class="plate plate-pad">
+      <div class="gate-banner">
+        <div>
+          <p class="kicker">${escapeHtml(observedName)} vs ${escapeHtml(contractName)} ${evidenceChip(observedEvidence)}</p>
+          <div class="stat ${bad.length ? 'bad' : 'ok'}">${bad.length ? `${bad.length} drift${bad.length > 1 ? 's' : ''}` : 'Conformant'}</div>
+        </div>
+        <div class="stat-row" style="min-width:min(100%,380px)">
+          <div><div class="stat-sm">${rows.length - bad.length}/${rows.length}</div><div class="stat-label">invariants hold</div></div>
+          <div><div class="stat-sm ${critical ? 'bad' : ''}">${critical}</div><div class="stat-label">critical</div></div>
+          <div><div class="stat-sm">${extra.length}</div><div class="stat-label">extra keys</div></div>
+        </div>
+      </div>
+      <div class="btn-row" style="margin:0.8rem 0 0">
+        ${bad.length ? '<button class="press" id="exportDrift" type="button">Export drift report</button>' : ''}
+        <button class="press ${canaryTripped ? 'press-red' : ''}" id="canary" type="button">${canaryTripped ? 'Re-arm canary' : 'Simulate a canary hit'}</button>
+      </div>
+      <p class="hash" style="margin:0.4rem 0 0.8rem">${canaryTripped
+        ? '<span class="chip chip-bad">canary tripped</span> a honeytoken planted in one cell was read from another'
+        : '<span class="chip chip-ok">canaries dark</span> no honeytoken has been touched'}</p>
+      <div style="overflow:auto">
+        <table class="sheet">
+          <thead><tr><th>Invariant</th><th>Contract</th><th>Observed</th><th>Result</th></tr></thead>
+          <tbody>${rows.sort((a, b) => Number(a.ok) - Number(b.ok)).map((r) => `
+            <tr class="${r.ok ? '' : 'is-off'}">
+              <td>${escapeHtml(r.key)}</td>
+              <td>${escapeHtml(show(r.want))}</td>
+              <td class="${r.ok ? '' : 'bad'}">${escapeHtml(show(r.got))}</td>
+              <td>${r.ok ? '<span class="ok">holds</span>' : `<span class="chip ${r.severity === 'critical' ? 'chip-bad' : 'chip-gold'}">${r.severity}</span>`}</td>
+            </tr>`).join('')}</tbody>
+        </table>
+      </div>
+      ${extra.length ? `<p class="hash" style="margin-top:0.6rem">Not in the contract (ignored): ${extra.map(escapeHtml).join(', ')}</p>` : ''}
+    </div>`;
+
+  document.getElementById('canary').onclick = () => {
+    canaryTripped = !canaryTripped;
+    showToast(canaryTripped ? 'Canary tripped' : 'Canary re-armed', canaryTripped
+      ? 'A honeytoken was read from the wrong cell. The release gate will refuse.'
+      : 'Honeytokens are dark again.', canaryTripped ? 'bad' : 'ok');
+    render();
+  };
+  const ex = document.getElementById('exportDrift');
+  if (ex) ex.onclick = () => downloadFile('triseal-drift-report.json', JSON.stringify({
+    contract: contractName, observed: observedName, checked_at: new Date().toISOString(),
+    drifts: bad.map(({ key, want, got, severity }) => ({ invariant: key, expected: want, observed: got ?? null, severity })),
+  }, null, 2));
+}
+
+app.innerHTML = wrapPage('conformance', `
+<main class="inner">
+  ${plateHead('Conformance', 'The contract<br>is the sandbox.',
+    'You publish an isolation contract. Conformance compares the sandbox you are actually running against it, invariant by invariant, '
+    + 'and flags any drift before a single prompt is relayed.')}
+  <div class="explain"><b>In plain terms</b>A results table means nothing if the sandbox quietly gave the model write access or bridged Red and Blue onto one network.
+    Export your running config (or describe it in the contract’s format), drop it here, and see every difference.</div>
+
+  <div class="plate plate-pad" style="margin-bottom:1.4rem">
+    <div class="gate-banner">
+      <div>
+        <p class="kicker">Published contract</p>
+        <p class="hash" id="contractInfo">loading…</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label class="row-btn" style="cursor:pointer">Use your own contract<input type="file" id="contractFile" class="sr-only" accept=".yaml,.yml,.json"></label>
+        <a class="row-btn" href="/samples/isolation-contract.yaml" download style="text-decoration:none;color:inherit">Download contract</a>
+      </div>
+    </div>
+  </div>
+
+  ${uploadPanel({
+    id: 'up-config',
+    title: 'Check your running sandbox',
+    blurb: 'Upload the observed configuration in the same shape as the contract — YAML or JSON, with or without the top-level <code>invariants:</code> key. '
+      + 'Lists such as <code>cap_drop</code> compare as sets.',
+    formats: 'YAML · JSON',
+    sampleHref: '/samples/observed-config.yaml',
+  })}
+  <div class="btn-row" style="margin-top:0.8rem">
+    <button class="press" id="reference" type="button">Load the reference sandbox (clean pass)</button>
+  </div>
+  <div id="result" class="results"></div>
+</main>
+`);
+
+async function loadContract(text, name) {
+  contract = parseConfig(text, name);
+  contractName = name;
+  const n = Object.keys(flatten(contract)).length;
+  if (!n) throw new Error('no invariants found in the contract');
+  const h = await sha256(text);
+  document.getElementById('contractInfo').innerHTML = `${escapeHtml(name)} · ${n} invariants · sha256 ${hexPreview(h, 16)}…`;
+}
+
+(async () => {
+  try {
+    const res = await fetch('/samples/isolation-contract.yaml');
+    await loadContract(await res.text(), 'isolation-contract.yaml');
+  } catch (err) {
+    document.getElementById('contractInfo').textContent = 'Could not load the default contract: ' + err.message;
+  }
+  render();
+})();
+
+document.getElementById('contractFile').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    await loadContract(await f.text(), f.name);
+    showToast('Contract loaded', f.name, 'ok');
+    render();
+  } catch (err) {
+    showToast('Could not read contract', err.message, 'bad');
+  }
+});
+
+document.getElementById('reference').onclick = () => {
+  if (!contract) return;
+  observed = JSON.parse(JSON.stringify(contract));
+  observedName = 'reference sandbox (simulated)';
+  observedEvidence = 'simulated';
+  render();
+  showToast('Reference sandbox', 'A sandbox built exactly to contract — every invariant holds.', 'ok');
+};
+
+bindUpload('up-config', {
+  sampleHref: '/samples/observed-config.yaml',
+  onData: ({ name, text, source }) => {
+    if (!contract) throw new Error('the contract has not loaded yet');
+    observed = parseConfig(text, name);
+    observedName = name;
+    observedEvidence = evidenceOf(source);
+    render();
+    const { rows } = diff();
+    const bad = rows.filter((r) => !r.ok).length;
+    showToast(bad ? `${bad} drift(s) found` : 'Conformant', bad ? 'See the highlighted invariants.' : 'Every invariant holds.', bad ? 'bad' : 'ok');
+    return bad ? `${bad} drift(s)` : 'conformant';
+  },
+});

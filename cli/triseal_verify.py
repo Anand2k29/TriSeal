@@ -49,6 +49,9 @@ def run_self_test(simulate_tamper: bool = False) -> int:
 
 
 if __name__ == "__main__":
+    # Windows consoles default to cp1252, which cannot print the check marks below.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="TriSeal Public Certificate & Ledger Verifier CLI")
     parser.add_argument("--self-test", action="store_true", help="Run deterministic hash-chain verification")
     parser.add_argument("--simulate-tamper", action="store_true", help="Simulate single-byte tamper detection")

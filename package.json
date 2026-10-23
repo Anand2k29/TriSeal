@@ -2,12 +2,28 @@
   "name": "triseal-ps4-platform",
   "version": "2.4.0",
   "private": true,
-  "description": "TriSeal (PS-4): Sealed Multi-Party AI Safety Evaluation & Verification Engine by Team Pinnacle",
+  "description": "TriSeal: sealed multi-party red-teaming for AI models — airlock relay, tamper-evident ledger, conformance, side-channel hunting and a signed release gate",
   "scripts": {
-    "start": "python3 -m http.server 3000",
-    "verify": "python3 cli/triseal_verify.py --self-test"
+    "setup": "npm --prefix site install",
+    "dev": "npm --prefix site run dev",
+    "build": "npm --prefix site run build",
+    "preview": "npm --prefix site run preview",
+    "api": "python -m uvicorn api.index:app --reload --port 8000",
+    "verify": "python cli/triseal_verify.py --self-test",
+    "verify:tamper": "python cli/triseal_verify.py --self-test --simulate-tamper",
+    "samples": "node scripts/generate-samples.mjs site/public/samples isolation-contract.yaml && node -e \"require('fs').copyFileSync('isolation-contract.yaml','site/public/samples/isolation-contract.yaml')\""
   },
-  "keywords": ["ai-safety", "red-teaming", "gvisor", "merkle-tree", "opa", "triseal"],
+  "keywords": [
+    "ai-safety",
+    "red-teaming",
+    "gvisor",
+    "merkle-tree",
+    "opa",
+    "triseal"
+  ],
   "author": "Team Pinnacle (Jyotasana, Arpita Matta, Anand Minejes)",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19.0"
+  }
 }
