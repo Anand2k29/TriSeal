@@ -117,7 +117,7 @@ The ledger verifier accepts both this site's format (`|` separator) and the CLI/
 
 </details>
 
-## ✅ Verify in CI
+## ✅ Verify in CLI
 
 ```bash
 python cli/triseal_verify.py --self-test                    # exit 0 when the chain verifies
